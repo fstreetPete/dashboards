@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investor Lead Dashboard | Weekly Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@300;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0a0a0a;
+      --ink-2: #0e0e0e;
+      --panel: #141414;
+      --panel-2: #1a1a1a;
+      --signal: #c7f53d;
+      --white: #ffffff;
+      --bone: #ECECEC;
+      --steel: #C9C9C2;
+      --mid: #C7C7C7;
+      --warn: #ff6b35;
+      --line: rgba(255,255,255,.08);
+      --line-2: rgba(255,255,255,.16);
+      --nav-w: 260px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--ink);
+      color: var(--white);
+      font-family: Inter, Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mix-blend-mode: overlay;
+    }
+
+    .side-nav {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--nav-w);
+      padding: 34px 26px;
+      background: rgba(10,10,10,.92);
+      border-right: 1px solid var(--line-2);
+      z-index: 10;
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-kicker {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--signal);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .nav-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: .95;
+      margin: 0 0 34px 0;
+    }
+
+    .nav-title span { color: var(--signal); }
+
+    .side-nav a {
+      display: block;
+      color: var(--steel);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      transition: color .2s ease;
+    }
+
+    .side-nav a:hover { color: var(--signal); }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      margin-left: var(--nav-w);
+      min-height: 100vh;
+    }
+
+    .section {
+      padding: 110px 52px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--signal);
+      margin-bottom: 18px;
+    }
+
+    .label::before {
+      content: "// ";
+      color: var(--mid);
+      margin-right: 2px;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Inter Tight', sans-serif;
+      letter-spacing: -.035em;
+      line-height: .95;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(56px, 8vw, 132px);
+      font-weight: 800;
+      max-width: 1050px;
+    }
+
+    h2 {
+      font-size: clamp(46px, 5.5vw, 92px);
+      font-weight: 800;
+      margin-bottom: 38px;
+    }
+
+    h3 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .light { color: var(--bone); font-weight: 300; }
+    .signal { color: var(--signal); }
+
+    .meta-strip {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--steel);
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin: 0 0 28px 0;
+    }
+
+    .dot { color: var(--signal); }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 48px;
+      align-items: start;
+      margin-top: 52px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line-2);
+      padding: 28px;
+      position: relative;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 2px;
+      width: 72px;
+      background: var(--signal);
+    }
+
+    .panel-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--signal);
+      margin-bottom: 18px;
+    }
+
+    ul.clean-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    ul.clean-list li {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+      color: var(--bone);
+      font-size: 15px;
+    }
+
+    ul.clean-list li:last-child { border-bottom: 0; }
+
+    .date-list li {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 20px;
+    }
+
+    .date {
+      color: var(--signal);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .snapshot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--line-2);
+      background: var(--panel);
+    }
+
+    .snapshot-card {
+      padding: 30px 28px;
+      border-right: 1px solid var(--line);
+      min-height: 170px;
+    }
+
+    .snapshot-card:last-child { border-right: 0; }
+
+    .snap-label {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--steel);
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 26px;
+    }
+
+    .snap-value {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: clamp(36px, 4vw, 58px);
+      line-height: .92;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+
+    .snap-goal {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--signal);
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line-2);
+      background: var(--panel);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+
+    th, td {
+      padding: 16px 14px;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      text-align: right;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--steel);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      font-weight: 600;
+      background: var(--ink-2);
+    }
+
+    td {
+      color: var(--bone);
+      font-size: 14px;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    th:last-child, td:last-child { border-right: 0; }
+
+    .dash { color: var(--steel); }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .hubspot-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 24px;
+      border: 1px solid var(--line-2);
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 24px;
+      transition: all .25s ease;
+    }
+
+    .hubspot-link:hover {
+      border-color: var(--signal);
+      color: var(--signal);
+      background: rgba(199,245,61,.04);
+    }
+
+    .hubspot-link span { color: var(--signal); }
+
+    .deal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .deal-card {
+      background: var(--panel);
+      border: 1px solid var(--line-2);
+      padding: 26px;
+      min-height: 240px;
+    }
+
+    .deal-status {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--signal);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .deal-name {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: .95;
+      margin-bottom: 20px;
+    }
+
+    .deal-meta {
+      color: var(--bone);
+      font-size: 14px;
+    }
+
+    .line-items {
+      display: grid;
+      gap: 14px;
+    }
+
+    .line-item {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 24px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .line-item:last-child { border-bottom: 0; }
+
+    .line-key {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--signal);
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .line-val { color: var(--bone); }
+
+    @media (max-width: 1024px) {
+      .side-nav {
+        position: static;
+        width: 100%;
+        border-right: 0;
+        border-bottom: 1px solid var(--line-2);
+      }
+      .page { margin-left: 0; }
+      .section { padding: 80px 24px; }
+      .hero-grid, .two-col, .deal-grid { grid-template-columns: 1fr; }
+      .snapshot-grid { grid-template-columns: repeat(2, 1fr); }
+      .snapshot-card { border-bottom: 1px solid var(--line); }
+    }
+
+    @media (max-width: 620px) {
+      .snapshot-grid { grid-template-columns: 1fr; }
+      .snapshot-card { border-right: 0; }
+      .date-list li, .line-item { grid-template-columns: 1fr; gap: 6px; }
+      h1 { font-size: clamp(42px, 13vw, 72px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-overlay"></div>
+
+  <aside class="side-nav">
+    <div class="nav-kicker">Weekly Dashboard</div>
+    <div class="nav-title">Investor Lead <span>Command.</span></div>
+    <a href="#brief">Brief</a>
+    <a href="#recap">Previous Recap</a>
+    <a href="#snapshot">KPI Snapshot</a>
+    <a href="#channels">Channel KPIs</a>
+    <a href="#pipeline-review">Pipeline Review</a>
+    <a href="#deal-pipeline">Deal Pipeline</a>
+    <a href="#data">Data Management</a>
+    <a href="#actions">Weekly Actions</a>
+  </aside>
+
+  <main class="page">
+    <section id="brief" class="section">
+      <div class="container">
+        <div class="meta-strip"><span class="dot">●</span> WEEKLY INVESTOR LEAD DASHBOARD / WEEK ENDING [DATE] / [MONTH]</div>
+        <h1>Investor acquisition. <span class="light">Capital movement.</span> <span class="signal">Weekly readout.</span></h1>
+
+        <div class="hero-grid">
+          <div class="panel">
+            <div class="panel-title">Primary discussion items</div>
+            <ul class="clean-list">
+              <li>[Primary item 1]</li>
+              <li>[Primary item 2]</li>
+              <li>[Primary item 3]</li>
+            </ul>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">Date-driven priorities</div>
+            <ul class="clean-list date-list">
+              <li><span class="date">[DATE]</span><span>[Brief priority description]</span></li>
+              <li><span class="date">[DATE]</span><span>[Brief priority description]</span></li>
+              <li><span class="date">[DATE]</span><span>[Brief priority description]</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="recap" class="section">
+      <div class="container">
+        <div class="label">Previous recap</div>
+        <h2>Last meeting. <span class="light">Clean carryover.</span></h2>
+        <div class="panel">
+          <div class="panel-title">Max 5 bullets from transcript</div>
+          <ul class="clean-list">
+            <li>[Previous meeting recap point 1]</li>
+            <li>[Previous meeting recap point 2]</li>
+            <li>[Previous meeting recap point 3]</li>
+            <li>[Explicit to-do if stated]</li>
+            <li>[Explicit to-do if stated]</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="snapshot" class="section">
+      <div class="container">
+        <div class="label">KPI snapshot</div>
+        <h2>Topline performance. <span class="light">Against goal.</span></h2>
+
+        <div class="snapshot-grid">
+          <div class="snapshot-card">
+            <div class="snap-label">Total Spend</div>
+            <div class="snap-value">$15,954</div>
+            <div class="snap-goal">/ $15,000 budgeted</div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snap-label">Total Leads</div>
+            <div class="snap-value">84</div>
+            <div class="snap-goal">/ [goal]</div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snap-label">Total New Investors</div>
+            <div class="snap-value">19</div>
+            <div class="snap-goal">/ 20 goal</div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snap-label">Total New Investment</div>
+            <div class="snap-value">$[x]</div>
+            <div class="snap-goal">/ $[goal]</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="channels" class="section">
+      <div class="container">
+        <div class="label">Channel KPIs</div>
+        <h2>Attributed channels. <span class="light">Only where trackable.</span></h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Channel</th>
+                <th>Spend</th>
+                <th>Leads</th>
+                <th>CPL</th>
+                <th>Accredited Investors</th>
+                <th>Cost / Accredited</th>
+                <th>Connected</th>
+                <th>Cost / Connected</th>
+                <th>New Investors</th>
+                <th>Cost / New Investor</th>
+                <th>New Investment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Meta</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>$[x]</td>
+              </tr>
+              <tr>
+                <td>AdWords</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>[x]</td>
+                <td>$[x]</td>
+                <td>$[x]</td>
+              </tr>
+              <tr>
+                <td>LinkedIn</td>
+                <td>$[x]</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+              </tr>
+              <tr>
+                <td>SimpliFi</td>
+                <td>$[x]</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+              </tr>
+              <tr>
+                <td>MNTN</td>
+                <td>$[x]</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+                <td class="dash">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="pipeline-review" class="section">
+      <div class="container">
+        <div class="label">Pipeline review</div>
+        <h2>Lead review. <span class="light">Specific conversations.</span></h2>
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-title">HubSpot dashboard</div>
+            <p style="color: var(--bone); margin: 0;">Use the curated HubSpot view for lead-level discussion, follow-up review, email performance, calls, and fit assessment.</p>
+            <a class="hubspot-link" href="[HUBSPOT_DASHBOARD_URL]" target="_blank" rel="noopener">Open HubSpot Pipeline <span>→</span></a>
+          </div>
+          <div class="panel">
+            <div class="panel-title">Discussion prompts</div>
+            <ul class="clean-list">
+              <li>[Pipeline discussion prompt 1]</li>
+              <li>[Pipeline discussion prompt 2]</li>
+              <li>[Pipeline discussion prompt 3]</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="deal-pipeline" class="section">
+      <div class="container">
+        <div class="label">Deal pipeline</div>
+        <h2>Offerings. <span class="light">Current and next.</span></h2>
+
+        <div class="deal-grid">
+          <div class="deal-card">
+            <div class="deal-status">Active</div>
+            <div class="deal-name">[Deal Name]</div>
+            <div class="deal-meta">[Timing / raise / short discussion point]</div>
+          </div>
+          <div class="deal-card">
+            <div class="deal-status">Upcoming</div>
+            <div class="deal-name">[Deal Name]</div>
+            <div class="deal-meta">[Timing / raise / short discussion point]</div>
+          </div>
+          <div class="deal-card">
+            <div class="deal-status">Horizon</div>
+            <div class="deal-name">[Deal Name]</div>
+            <div class="deal-meta">[Timing / raise / short discussion point]</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="data" class="section">
+      <div class="container">
+        <div class="label">Data management</div>
+        <h2>Tracking gaps. <span class="light">Next actions.</span></h2>
+        <div class="panel">
+          <div class="line-items">
+            <div class="line-item">
+              <div class="line-key">Item</div>
+              <div class="line-val">[Data management line item]</div>
+            </div>
+            <div class="line-item">
+              <div class="line-key">Need</div>
+              <div class="line-val">[Integration / cleanup / reporting need]</div>
+            </div>
+            <div class="line-item">
+              <div class="line-key">Next</div>
+              <div class="line-val">[Next data action]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="actions" class="section">
+      <div class="container">
+        <div class="label">Weekly actions</div>
+        <h2>Decisions. <span class="light">Carryover items.</span></h2>
+        <div class="panel">
+          <ul class="clean-list">
+            <li>[Decision / action item 1]</li>
+            <li>[Decision / action item 2]</li>
+            <li>[Decision / action item 3]</li>
+            <li>[Carryover item]</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
